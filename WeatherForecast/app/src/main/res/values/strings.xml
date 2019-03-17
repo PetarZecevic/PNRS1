@@ -2,4 +2,7 @@
     <string name="app_name">WeatherForecast</string>
     <string name="input_text_hint">Lokacija za prikaz vremenske prognoze:</string>
     <string name="input_button_name">Prikaži</string>
+    <string name="alert_city_text">Morate navesti ime grada</string>
+    <string name="alert_city_title">Prazno ime grada</string>
+    <string name="alert_ok">OK</string>
 </resources>
