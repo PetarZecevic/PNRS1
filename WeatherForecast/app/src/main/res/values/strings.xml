@@ -5,4 +5,9 @@
     <string name="alert_city_text">Morate navesti ime grada</string>
     <string name="alert_city_title">Prazno ime grada</string>
     <string name="alert_ok">OK</string>
+    <string name="location_text">Lokacija:</string>
+    <string name="day_text">Dan:</string>
+    <string name="temp_button_name">Temperatura</string>
+    <string name="sunrise_button_name">Izlazak i zalazak sunca</string>
+    <string name="wind_button_name">Vetar</string>
 </resources>
