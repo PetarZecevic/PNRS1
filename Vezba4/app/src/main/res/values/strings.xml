@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Vezba4</string>
+    <string name="add_button">Dodaj</string>
+    <string name="empty_list">List is empty</string>
+</resources>
