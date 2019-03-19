@@ -10,4 +10,12 @@
     <string name="temp_button_name">Temperatura</string>
     <string name="sunrise_button_name">Izlazak i zalazak sunca</string>
     <string name="wind_button_name">Vetar</string>
+    <string name="unit_text">Jedinica:</string>
+    <string name="temp_text">Temperatura:</string>
+    <string name="pressure_text">Pritisak:</string>
+    <string name="humidity_text">Vlažnost vazduha:</string>
+    <string name="sunrise_up_text">Izlazak sunca:</string>
+    <string name="sunrise_down_text">Zalazak sunca:</string>
+    <string name="wind_speed_text">Brzina vetra:</string>
+    <string name="wind_direction_text">Pravac:</string>
 </resources>

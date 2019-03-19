@@ -11,9 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    private EditText city;
-    private Button displayCityStats;
-    private AlertDialog cityAlert;
+    private EditText mCity;
+    private Button mSubmit;
+    private AlertDialog mAlert;
     private static final String TAG = "MainActivity";
     public static final String CITY_INDEX = "city_name_index";
 
@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        city = findViewById(R.id.city_name);
-        displayCityStats = findViewById(R.id.display_stats);
-        displayCityStats.setOnClickListener(this);
+        mCity = findViewById(R.id.city_name);
+        mSubmit = findViewById(R.id.display_stats);
+        mSubmit.setOnClickListener(this);
 
         createCityAlert();
     }
@@ -40,14 +40,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 dialogInterface.cancel();
             }
         });
-        cityAlert = builder1.create();
+        mAlert = builder1.create();
     }
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == displayCityStats.getId()) {
+        if(v.getId() == mSubmit.getId()) {
             // Send city name to next activity.
-            String cityName = String.valueOf(city.getText());
+            String cityName = String.valueOf(mCity.getText());
             if (!cityName.isEmpty()) {
                 Log.d(TAG, "City: " + cityName);
                 Intent binder = new Intent(this, DetailsActivity.class);
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(binder);
             }
             else {
-                cityAlert.show();
+                mAlert.show();
             }
         }
     }
