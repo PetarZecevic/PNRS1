@@ -114,6 +114,7 @@
                         android:text="@string/temp_text"
                         style="@style/DetailsTheme"/>
                     <TextView
+                        android:id="@+id/temp_val"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/DetailsTheme"/>
@@ -128,6 +129,7 @@
                         android:text="@string/pressure_text"
                         style="@style/DetailsTheme"/>
                     <TextView
+                        android:id="@+id/pressure_val"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/DetailsTheme"/>
@@ -142,6 +144,7 @@
                         android:text="@string/humidity_text"
                         style="@style/DetailsTheme"/>
                     <TextView
+                        android:id="@+id/humidity_val"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/DetailsTheme"/>
