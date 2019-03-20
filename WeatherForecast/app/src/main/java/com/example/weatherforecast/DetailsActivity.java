@@ -1,6 +1,7 @@
 package com.example.weatherforecast;
 
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,9 +11,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.Calendar;
+import java.util.Date;
 
 
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
+    private Calendar mCalendar;
     private TextView mLocation, mDay;
     private Button mTemperatureOption, mSunriseOption, mWindOption;
     private Display mWindDisplay, mSunriseDisplay;
@@ -28,13 +31,16 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        // Set calendar.
+        mCalendar = Calendar.getInstance();
+        mCalendar.setFirstDayOfWeek(Calendar.MONDAY);
         // Get data sent from Main activity.
         String locationName = getIntent().getStringExtra(MainActivity.CITY_INDEX);
         mLocation = findViewById(R.id.location);
         mDay = findViewById(R.id.day);
 
         mLocation.setText((CharSequence)locationName);
-        mDay.setText(parseDay((Calendar.DAY_OF_WEEK+1)%7));
+        mDay.setText(parseDay(mCalendar.get(Calendar.DAY_OF_WEEK)));
 
         initDisplays();
         initOptions();
@@ -130,27 +136,27 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.temp_button:
-                mTemperatureOption.setBackgroundColor(Color.BLUE);
-                mSunriseOption.setBackgroundColor(Color.GRAY);
-                mWindOption.setBackgroundColor(Color.GRAY);
+                mTemperatureOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSelected));
+                mSunriseOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
+                mWindOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
 
                 mTemperatureDisplay.show(Boolean.TRUE);
                 mWindDisplay.show(Boolean.FALSE);
                 mSunriseDisplay.show(Boolean.FALSE);
                 break;
             case R.id.sunrise_button:
-                mTemperatureOption.setBackgroundColor(Color.GRAY);
-                mSunriseOption.setBackgroundColor(Color.BLUE);
-                mWindOption.setBackgroundColor(Color.GRAY);
+                mTemperatureOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
+                mSunriseOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSelected));
+                mWindOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
 
                 mTemperatureDisplay.show(Boolean.FALSE);
                 mSunriseDisplay.show(Boolean.TRUE);
                 mWindDisplay.show(Boolean.FALSE);
                 break;
             case R.id.wind_button:
-                mTemperatureOption.setBackgroundColor(Color.GRAY);
-                mSunriseOption.setBackgroundColor(Color.GRAY);
-                mWindOption.setBackgroundColor(Color.BLUE);
+                mTemperatureOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
+                mSunriseOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorUnselected));
+                mWindOption.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSelected));
 
                 mTemperatureDisplay.show(Boolean.FALSE);
                 mSunriseDisplay.show(Boolean.FALSE);
@@ -165,6 +171,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         String item = mTemperatureDisplay.unitsAdapter.getItem(i);
         if(!mTemperatureDisplay.scaleSelected.equals(item)){
+            mTemperatureDisplay.scaleSelected = item;
             double val = Double.valueOf(mTemperatureDisplay.values.get("temperature"));
             if(item.equals("F")){
                 val = val * 1.8 + 32.0;
@@ -173,8 +180,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 val = (val - 32.0) / 1.8;
             }
             // Update value in view object.
-            String s = mTemperatureDisplay.values.get("temperature");
-            s = String.valueOf(val);
+            mTemperatureDisplay.values.put("temperature", String.valueOf(val));
             mTemperatureDisplay.setValues();
         }
     }

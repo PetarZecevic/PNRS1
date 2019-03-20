@@ -1,3 +1,1 @@
-* Omoguci promenu prikaza temperature u celzijusovoj i farenhajtovoj skali
-* Vrednosti neka budu prikazane drugacijim slovima
-* Promeni pozadine opcija i boju teksta (zeleno, belo)
+* Dodaj vrednost za levu marginu kod prikaza vrednosti
