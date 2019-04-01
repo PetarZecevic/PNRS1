@@ -21,7 +21,8 @@
         <TextView
             android:id="@+id/location"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="@style/DataTheme"/>
     </LinearLayout>
 
     <LinearLayout
@@ -37,7 +38,8 @@
         <TextView
             android:id="@+id/day"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="@style/DataTheme"/>
     </LinearLayout>
 
     <LinearLayout
@@ -115,7 +117,8 @@
                     <TextView
                         android:id="@+id/temp_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        style="@style/DataTheme"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -129,7 +132,8 @@
                     <TextView
                         android:id="@+id/pressure_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        style="@style/DataTheme"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -143,7 +147,8 @@
                     <TextView
                         android:id="@+id/humidity_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        style="@style/DataTheme"/>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -166,7 +171,8 @@
                 <TextView
                     android:id="@+id/sunrise_up"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    style="@style/DataTheme"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -180,7 +186,8 @@
                 <TextView
                     android:id="@+id/sunrise_down"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    style="@style/DataTheme"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -202,7 +209,8 @@
                 <TextView
                     android:id="@+id/wind_speed"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    style="@style/DataTheme"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -216,7 +224,8 @@
                 <TextView
                     android:id="@+id/wind_diretion"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    style="@style/DataTheme"/>
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>
