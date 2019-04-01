@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         mCity = findViewById(R.id.city_name);
-        mSubmit = findViewById(R.id.display_stats);
+        mSubmit = findViewById(R.id.input_button);
         mSubmit.setOnClickListener(this);
 
         createCityAlert();
