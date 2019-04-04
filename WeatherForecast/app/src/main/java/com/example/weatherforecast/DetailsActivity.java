@@ -1,5 +1,8 @@
 package com.example.weatherforecast;
 
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +13,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.time.format.TextStyle;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
@@ -30,7 +36,6 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-
         // Set calendar.
         mCalendar = Calendar.getInstance();
         mCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -40,8 +45,10 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mDay = findViewById(R.id.day);
 
         mLocation.setText((CharSequence)locationName);
-        mDay.setText(parseDay(mCalendar.get(Calendar.DAY_OF_WEEK)));
-
+        Locale locale = new Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build();
+        String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, locale);
+        day = day.substring(0,1).toUpperCase(locale) + day.substring(1);
+        mDay.setText(day);
         initDisplays();
         initOptions();
     }
@@ -101,7 +108,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mWindOption.setOnClickListener(this);
     }
 
-    private CharSequence parseDay(int d){
+   /* private CharSequence parseDay(int d){
         CharSequence day;
         switch(d){
             case Calendar.MONDAY:
@@ -130,7 +137,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 break;
         }
         return day;
-    }
+    }*/
 
     @Override
     public void onClick(View view) {

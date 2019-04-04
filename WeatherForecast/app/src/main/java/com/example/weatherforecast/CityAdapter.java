@@ -1,10 +1,13 @@
 package com.example.weatherforecast;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -14,7 +17,7 @@ public class CityAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<CityOption> mCityOptions;
     private static class ViewHolder{
-        //public RadioButton rbutton;
+        public RadioButton rbutton;
         public TextView cname;
     }
 
@@ -58,15 +61,44 @@ public class CityAdapter extends BaseAdapter {
         return ret;
     }
 
+    public boolean hasItem(CityOption co){
+        boolean ret = false;
+        for (CityOption c : mCityOptions) {
+            if(c.getCityName().equals(co.getCityName())){
+                ret = true;
+                break;
+            }
+        }
+        return ret;
+    }
+
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, ViewGroup viewGroup) {
         View convertView = view;
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.city_element, null);
             ViewHolder holder = new ViewHolder();
-           // holder.rbutton = (RadioButton) convertView.findViewById(R.id.element_button);
-            holder.cname = (TextView) convertView.findViewById(R.id.element_name);
+            holder.rbutton = convertView.findViewById(R.id.element_button);
+            holder.cname = convertView.findViewById(R.id.element_name);
+            holder.rbutton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b) {
+                            compoundButton.setChecked(false);
+                            Intent switchActivity = new Intent(mContext, DetailsActivity.class);
+                            switchActivity.putExtra(MainActivity.CITY_INDEX, mCityOptions.get(i).getCityName());
+                            mContext.startActivity(switchActivity);
+                    }
+                }
+            });
+            holder.rbutton.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    CityOption co = mCityOptions.get(i);
+                    return removeItem(co);
+                }
+            });
             convertView.setTag(holder);
         }
         CityOption option = (CityOption) getItem(i);
