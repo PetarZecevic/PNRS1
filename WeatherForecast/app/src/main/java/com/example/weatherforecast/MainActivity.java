@@ -14,7 +14,8 @@ import android.widget.ListView;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+        AdapterView.OnItemLongClickListener
 {
     private EditText mCity;
     private Button mSubmit;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdapter = new CityAdapter(this);
         cityList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         cityList.setAdapter(mAdapter);
+        cityList.setOnItemLongClickListener(this);
         // Alert
         mAlert1 = createAlert("Prazno ime grada");
         mAlert2 = createAlert("Grad je već unet u listu");
@@ -71,5 +73,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             else
                 mAlert1.show();
         }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        CityOption co = null;
+        try {
+            co = (CityOption) mAdapter.getItem(i);
+            return mAdapter.removeItem(co);
+        }catch(IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

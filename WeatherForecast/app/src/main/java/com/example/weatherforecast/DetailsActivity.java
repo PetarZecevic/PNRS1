@@ -25,6 +25,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private TextView mLocation, mDay;
     private Button mTemperatureOption, mSunriseOption, mWindOption;
     private Display mWindDisplay, mSunriseDisplay;
+    private Locale mLocal;
 
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
@@ -43,14 +44,19 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         String locationName = getIntent().getStringExtra(MainActivity.CITY_INDEX);
         mLocation = findViewById(R.id.location);
         mDay = findViewById(R.id.day);
-
         mLocation.setText((CharSequence)locationName);
-        Locale locale = new Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build();
-        String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, locale);
-        day = day.substring(0,1).toUpperCase(locale) + day.substring(1);
-        mDay.setText(day);
+
+        mLocal = new Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build();
+        setDay();
         initDisplays();
         initOptions();
+    }
+
+    private void setDay()
+    {
+        String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, mLocal);
+        day = day.substring(0,1).toUpperCase(mLocal) + day.substring(1);
+        mDay.setText(day);
     }
 
     private void initDisplays(){
@@ -107,37 +113,6 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mWindOption = findViewById(R.id.wind_button);
         mWindOption.setOnClickListener(this);
     }
-
-   /* private CharSequence parseDay(int d){
-        CharSequence day;
-        switch(d){
-            case Calendar.MONDAY:
-                day = "Ponedeljak";
-                break;
-            case Calendar.TUESDAY:
-                day = "Utorak";
-                break;
-            case Calendar.WEDNESDAY:
-                day = "Sreda";
-                break;
-            case Calendar.THURSDAY:
-                day = "Cetvrtak";
-                break;
-            case Calendar.FRIDAY:
-                day = "Petak";
-                break;
-            case Calendar.SATURDAY:
-                day = "Subota";
-                break;
-            case Calendar.SUNDAY:
-                day = "Nedelja";
-                break;
-            default:
-                day = "NONE";
-                break;
-        }
-        return day;
-    }*/
 
     @Override
     public void onClick(View view) {

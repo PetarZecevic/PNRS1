@@ -92,13 +92,6 @@ public class CityAdapter extends BaseAdapter {
                     }
                 }
             });
-            holder.rbutton.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    CityOption co = mCityOptions.get(i);
-                    return removeItem(co);
-                }
-            });
             convertView.setTag(holder);
         }
         CityOption option = (CityOption) getItem(i);
