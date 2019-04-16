@@ -1,1 +1,4 @@
-* Dodaj vrednost za levu marginu kod prikaza vrednosti
+* ISO 3166 country code za API-vremenska progrnoza
+Poziv za grad i zemlju koji vraca listu pronadjenih lokacija:
+	api.openweather.org/data/2.5/weather?q={cityname},{country code}
+

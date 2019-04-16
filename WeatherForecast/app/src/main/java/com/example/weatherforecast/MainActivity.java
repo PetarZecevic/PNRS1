@@ -1,5 +1,6 @@
 package com.example.weatherforecast;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
@@ -39,13 +40,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         cityList.setAdapter(mAdapter);
         cityList.setOnItemLongClickListener(this);
         // Alert
-        mAlert1 = createAlert("Prazno ime grada");
-        mAlert2 = createAlert("Grad je već unet u listu");
+        mAlert1 = createAlert("Prazno ime grada", this);
+        mAlert2 = createAlert("Grad je već unet u listu", this);
     }
 
-    private AlertDialog createAlert(String alertText)
+    public static AlertDialog createAlert(String alertText, Context context)
     {
-        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
         builder1.setMessage(alertText);
         builder1.setTitle("Greška");
         builder1.setNeutralButton(R.string.alert_ok, new DialogInterface.OnClickListener() {
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(v.getId() == mSubmit.getId()) {
             // Send city name to next activity.
             String cityName = String.valueOf(mCity.getText());
+            cityName = cityName.trim();
             if (!cityName.isEmpty()) {
                 CityOption c = new CityOption(cityName);
                 if(!mAdapter.hasItem(c))

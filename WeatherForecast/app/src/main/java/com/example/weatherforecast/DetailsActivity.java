@@ -1,12 +1,13 @@
 package com.example.weatherforecast;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.Color;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,18 +15,68 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.time.format.TextStyle;
+import org.json.JSONObject;
+
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
+    private final static String LOG_TAG = "DetailsActivity";
     private Calendar mCalendar;
     private TextView mLocation, mDay;
     private Button mTemperatureOption, mSunriseOption, mWindOption;
     private Display mWindDisplay, mSunriseDisplay;
     private Locale mLocal;
+    private HttpHelper mHttpHelper;
+    private Timer mTimer;
+    private class MyTimerTask extends TimerTask{
+        private Context mContext;
+        private Timer mTimer;
+        public MyTimerTask(Context context, Timer timer){
+            mContext = context;
+            mTimer = timer;
+        }
+        @Override
+        public void run() {
+            try {
+                JSONObject weatherJSON = mHttpHelper.getJSONObjectFromURL(BASE_URL +
+                        mLocation.getText() + "&" + METRIC + "&" + APPID);
+                Log.d(LOG_TAG, "JSON: " + weatherJSON.toString());
+            }catch (Exception e){
+                e.printStackTrace();
+                mTimer.cancel();
+                // Show to user alert.
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(mContext);
+                        builder1.setMessage("Grad nije pronađen");
+                        builder1.setTitle("Greška");
+                        builder1.setNeutralButton(R.string.alert_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int id) {
+                                dialogInterface.cancel();
+                                // Switch to MainActivity when exception occurs.
+                                Intent switchActivity = new Intent(mContext, MainActivity.class);
+                                startActivity(switchActivity);
+                            }
+                        });
+                        AlertDialog alert = builder1.create();
+                        alert.show();
+                    }
+                });
+            }
+        }
+    }
+    private MyTimerTask mRefresher;
+    private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather?q=";
+	private final static String IMG_URL = "http://openweathermap.org/img/w/";
+	private final static String METRIC = "units=metric";
+	private final static String APPID = "APPID=43316f9684dd3d0af930ecbb1b39fb35";
+    //private final static mWeatherData;
 
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
@@ -50,6 +101,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         setDay();
         initDisplays();
         initOptions();
+        setBackgroundRefresh();
     }
 
     private void setDay()
@@ -57,6 +109,20 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, mLocal);
         day = day.substring(0,1).toUpperCase(mLocal) + day.substring(1);
         mDay.setText(day);
+    }
+
+    private void setBackgroundRefresh()
+    {
+        mHttpHelper = new HttpHelper();
+        mTimer = new Timer();
+        mRefresher = new MyTimerTask(this, mTimer);
+        mTimer.schedule(mRefresher, 0, 5000L);
+    }
+
+    @Override
+    protected void onStop() {
+        mTimer.cancel();
+        super.onStop();
     }
 
     private void initDisplays(){

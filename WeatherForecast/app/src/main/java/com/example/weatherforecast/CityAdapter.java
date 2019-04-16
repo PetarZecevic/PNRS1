@@ -25,7 +25,7 @@ public class CityAdapter extends BaseAdapter {
         mContext = context;
         mCityOptions = new ArrayList<CityOption>();
         mCityOptions.add(new CityOption("Novi Sad"));
-        mCityOptions.add(new CityOption("Beograd"));
+        mCityOptions.add(new CityOption("Šabac"));
         mCityOptions.add(new CityOption("Subotica"));
     }
 
