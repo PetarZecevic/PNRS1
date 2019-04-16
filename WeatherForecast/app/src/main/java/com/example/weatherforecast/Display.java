@@ -27,7 +27,7 @@ public class Display {
     public void setValues(){
         for(String k : values.keySet()) {
             if (items.containsKey(k)) {
-                items.get(k).setText((CharSequence) values.get(k));
+                items.get(k).setText(values.get(k));
             }
         }
     }
