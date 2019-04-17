@@ -1,9 +1,9 @@
 package com.example.weatherforecast;
 
 public class WeatherData {
-    public double temperature;
+    public int temperature;
     public double humidity;
-    public double pressure;
+    public int pressure;
     public String sunUp;
     public String sunDown;
     public double windSpeed;

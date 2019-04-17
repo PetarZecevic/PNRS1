@@ -19,7 +19,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -82,6 +84,45 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mTimer.schedule(mRefresher, 0, 5000L);
     }
 
+    // Convert degree wind direction to cardinal direction:
+    //      example: 80 -> E
+    private String degreeToCardinal(double degree){
+        String direction = "";
+        if(degree >= 348.75 || degree < 11.25)
+            direction += "N";
+        else if(degree >= 11.25 && degree < 33.75)
+            direction += "NNE";
+        else if(degree >= 33.75 && degree < 56.25)
+            direction += "NE";
+        else if(degree >= 56.25 && degree < 78.75)
+            direction += "ENE";
+        else if(degree >= 78.75 && degree < 101.25)
+            direction += "E";
+        else if(degree >= 101.25 && degree < 123.75)
+            direction += "ESE";
+        else if(degree >= 123.75 && degree < 146.25)
+            direction += "SE";
+        else if(degree >= 146.25 && degree < 168.75)
+            direction += "SSE";
+        else if(degree >= 168.75 && degree < 191.25)
+            direction += "S";
+        else if(degree >= 191.25 && degree < 213.75)
+            direction += "SSW";
+        else if(degree >= 213.75 && degree < 236.25)
+            direction += "SW";
+        else if(degree >= 236.25 && degree < 258.75)
+            direction += "WSW";
+        else if(degree >= 258.75 && degree < 281.25)
+            direction += "W";
+        else if(degree >= 281.25 && degree < 303.75)
+            direction += "WNW";
+        else if(degree >= 303.75 && degree < 326.25)
+            direction += "NW";
+        else
+            direction += "NNW";
+        return direction;
+    }
+
     @Override
     public void update(JSONObject jsonObject) throws JSONException {
         Log.d(LOG_TAG, "JSON: " + jsonObject.toString());
@@ -89,21 +130,18 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         JSONObject mainObj = jsonObject.getJSONObject("main"); // temperature, humidity, pressure.
         JSONObject windObj = jsonObject.getJSONObject("wind");
 
-        mWeatherData.temperature = mainObj.getDouble("temp");
+        mWeatherData.temperature = mainObj.getInt("temp");
         mWeatherData.humidity = mainObj.getDouble("humidity");
-        mWeatherData.pressure = mainObj.getDouble("pressure");
+        mWeatherData.pressure = mainObj.getInt("pressure");
         // Convert unix timestamp to clock format.
-        long hour, minute;
-        long sunrise = sysObj.getLong("sunrise");
-        long sunset = sysObj.getLong("sunset");
-        minute = TimeUnit.MILLISECONDS.toMinutes(sunrise);
-        hour = TimeUnit.MILLISECONDS.toHours(sunrise);
-        mWeatherData.sunUp = String.format(mLocal,"%02d:%02d", hour, minute);
-        minute = TimeUnit.MILLISECONDS.toMinutes(sunset);
-        hour = TimeUnit.MILLISECONDS.toHours(sunset);
-        mWeatherData.sunDown = String.format(mLocal,"%02d:%02d", hour, minute);
+        long sunrise = sysObj.getLong("sunrise")*1000;
+        long sunset = sysObj.getLong("sunset")*1000;
+        Date dsunrise = new Date(sunrise);
+        Date dsunset = new Date(sunset);
+        mWeatherData.sunUp = new SimpleDateFormat("HH:mm", mLocal).format(dsunrise);
+        mWeatherData.sunDown = new SimpleDateFormat("HH:mm", mLocal).format(dsunset);
         mWeatherData.windSpeed = windObj.getDouble("speed");
-        mWeatherData.windDirection = String.valueOf(windObj.getDouble("deg"));
+        mWeatherData.windDirection = degreeToCardinal(windObj.getDouble("deg"));
 
         runOnUiThread(new Runnable() {
             @Override
@@ -187,18 +225,21 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
 
     private void updateDisplays()
     {
-        mTemperatureDisplay.values.put("pressure", String.valueOf(mWeatherData.pressure));
-        mTemperatureDisplay.values.put("temperature", String.valueOf(mWeatherData.temperature));
-        mTemperatureDisplay.values.put("humidity", String.valueOf(mWeatherData.humidity));
+        synchronized (mTemperatureDisplay) {
+            mTemperatureDisplay.values.put("pressure", String.valueOf(mWeatherData.pressure));
+            if(mTemperatureDisplay.scaleSelected.equals("F"))
+                mWeatherData.temperature = changeTempScale(mWeatherData.temperature, true);
+            mTemperatureDisplay.values.put("temperature", String.valueOf(mWeatherData.temperature));
+            mTemperatureDisplay.values.put("humidity", String.valueOf(mWeatherData.humidity));
+            mTemperatureDisplay.setValues();
+        }
 
         mSunriseDisplay.values.put("sunrise_up", mWeatherData.sunUp);
         mSunriseDisplay.values.put("sunrise_down", mWeatherData.sunDown);
+        mSunriseDisplay.setValues();
 
         mWindDisplay.values.put("wind_speed", String.valueOf(mWeatherData.windSpeed));
         mWindDisplay.values.put("wind_direction", mWeatherData.windDirection);
-
-        mTemperatureDisplay.setValues();
-        mSunriseDisplay.setValues();
         mWindDisplay.setValues();
     }
 
@@ -248,21 +289,34 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    private int changeTempScale(int tempValue, boolean FC)
+    {
+        int result = 0;
+        if(FC)
+            // Fahrenheit.
+            result = (int)((double)tempValue * 1.8 + 32);
+        else
+            // Celsius.
+            result = (int)(((double)tempValue - 32) / 1.8);
+        return result;
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        String item = mTemperatureDisplay.unitsAdapter.getItem(i);
-        if(!mTemperatureDisplay.scaleSelected.equals(item)){
-            mTemperatureDisplay.scaleSelected = item;
-            double val = Double.valueOf(mTemperatureDisplay.values.get("temperature"));
-            if(item.equals("F")){
-                val = val * 1.8 + 32.0;
+        synchronized (mTemperatureDisplay) {
+            String item = mTemperatureDisplay.unitsAdapter.getItem(i);
+            if (!mTemperatureDisplay.scaleSelected.equals(item)) {
+                mTemperatureDisplay.scaleSelected = item;
+                int val = Integer.valueOf(mTemperatureDisplay.values.get("temperature"));
+                if (item.equals("F")) {
+                    val = changeTempScale(val, true);
+                } else {
+                    val = changeTempScale(val, false);
+                }
+                // Update value in view object.
+                mTemperatureDisplay.values.put("temperature", String.valueOf(val));
+                mTemperatureDisplay.setValues();
             }
-            else{
-                val = (val - 32.0) / 1.8;
-            }
-            // Update value in view object.
-            mTemperatureDisplay.values.put("temperature", String.valueOf(val));
-            mTemperatureDisplay.setValues();
         }
     }
 
