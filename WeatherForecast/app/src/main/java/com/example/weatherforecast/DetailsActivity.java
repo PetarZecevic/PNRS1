@@ -3,6 +3,8 @@ package com.example.weatherforecast;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -31,7 +34,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         AdapterView.OnItemSelectedListener, onUpdateListener{
     public final static String LOG_TAG = "DetailsActivity";
     private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather?q=";
-    private final static String IMG_URL = "http://openweathermap.org/img/w/";
+    private final static String IMG_URL = "http://api.openweathermap.org/img/w/";
     private final static String METRIC = "units=metric";
     private final static String APPID = "APPID=43316f9684dd3d0af930ecbb1b39fb35";
     private Calendar mCalendar;
@@ -46,6 +49,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
         public String scaleSelected;
+        public ImageView weatherIcon;
     }
     private TemperatureDisplay mTemperatureDisplay;
 
@@ -80,7 +84,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private void setBackgroundRefresh()
     {
         mTimer = new Timer();
-        mRefresher = new WeatherTimerTask(BASE_URL+mLocation.getText()+"&"+METRIC+"&"+APPID ,this, this);
+        mRefresher = new WeatherTimerTask(BASE_URL+mLocation.getText()+"&"+METRIC+"&"+APPID,
+                IMG_URL, APPID, this, this);
         mTimer.schedule(mRefresher, 0, 5000L);
     }
 
@@ -124,7 +129,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void update(JSONObject jsonObject) throws JSONException {
+    public void update(JSONObject jsonObject, Bitmap imageData) throws JSONException {
         Log.d(LOG_TAG, "JSON: " + jsonObject.toString());
         JSONObject sysObj = jsonObject.getJSONObject("sys"); // sunset.
         JSONObject mainObj = jsonObject.getJSONObject("main"); // temperature, humidity, pressure.
@@ -142,6 +147,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mWeatherData.sunDown = new SimpleDateFormat("HH:mm", mLocal).format(dsunset);
         mWeatherData.windSpeed = windObj.getDouble("speed");
         mWeatherData.windDirection = degreeToCardinal(windObj.getDouble("deg"));
+        // Weather Image.
+        mWeatherData.weatherIcon = imageData;
 
         runOnUiThread(new Runnable() {
             @Override
@@ -198,6 +205,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mTemperatureDisplay.values.put("humidity", "1000");
         mTemperatureDisplay.items.put("pressure",(TextView) findViewById(R.id.pressure_val));
         mTemperatureDisplay.values.put("pressure", "1013");
+        mTemperatureDisplay.weatherIcon = findViewById(R.id.weather_icon);
         mTemperatureDisplay.setValues();
         // Celisus by default
         mTemperatureDisplay.scaleSelected = "C";
@@ -231,6 +239,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 mWeatherData.temperature = changeTempScale(mWeatherData.temperature, true);
             mTemperatureDisplay.values.put("temperature", String.valueOf(mWeatherData.temperature));
             mTemperatureDisplay.values.put("humidity", String.valueOf(mWeatherData.humidity));
+            mTemperatureDisplay.weatherIcon.setImageBitmap(mWeatherData.weatherIcon);
             mTemperatureDisplay.setValues();
         }
 

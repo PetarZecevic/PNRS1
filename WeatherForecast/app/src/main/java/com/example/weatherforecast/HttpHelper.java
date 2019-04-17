@@ -1,5 +1,7 @@
 package com.example.weatherforecast;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,25 +130,23 @@ public class HttpHelper {
         return (responseCode==SUCCESS);
     }
 
-    public byte[] getImage(String urlString){
+    public Bitmap getImage(String urlString){
         HttpURLConnection urlConnection = null;
         int responseCode = -1;
-        ByteArrayOutputStream baos = null;
+        Bitmap bitmap = null;
+        InputStream is = null;
         try {
             urlConnection = (HttpURLConnection) (new URL(urlString)).openConnection();
             urlConnection.setRequestMethod("GET");
+            //urlConnection.setRequestProperty("Accept", "*/*");
+            urlConnection.setReadTimeout(10000 /* milliseconds */ );
+            urlConnection.setConnectTimeout(15000 /* milliseconds */ );
             urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
+            urlConnection.setRequestProperty("Accept", "*/*");
             urlConnection.connect();
-
             // Let's read the response
-            InputStream is = urlConnection.getInputStream();
-            byte[] buffer = new byte[1024];
-            baos = new ByteArrayOutputStream();
-
-            while (is.read(buffer) != -1)
-                baos.write(buffer);
-
+            is =  urlConnection.getInputStream();
+            bitmap = BitmapFactory.decodeStream(is);
             is.close();
             responseCode = urlConnection.getResponseCode();
             urlConnection.disconnect();
@@ -154,6 +154,6 @@ public class HttpHelper {
             e.printStackTrace();
             return null;
         }
-        return responseCode == SUCCESS ? baos.toByteArray() : null;
+        return responseCode == SUCCESS ? bitmap : null;
 	}
 }
