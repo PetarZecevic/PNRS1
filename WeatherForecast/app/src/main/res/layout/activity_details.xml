@@ -30,16 +30,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
-            android:id="@+id/day_text"
+            android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/day_text"
+            android:text="@string/date_text"
             style="@style/DetailsTheme"/>
         <TextView
-            android:id="@+id/day"
+            android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/DataTheme"/>
+        <TextView
+            android:id="@+id/update_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/update_text"
+            style="@style/UpdateTheme"/>
+        <ImageButton
+            android:id="@+id/update_button"
+            android:layout_width="20sp"
+            android:layout_height="match_parent"
+            android:src="@drawable/update"
+            android:contentDescription="@string/update_description"/>
     </LinearLayout>
 
     <LinearLayout

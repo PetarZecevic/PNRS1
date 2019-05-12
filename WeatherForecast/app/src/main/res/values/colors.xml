@@ -6,4 +6,5 @@
     <color name="colorUnselected">#00ff00</color>
     <color name="colorSelected">#ffff00</color>
     <color name="colorOptionText">#0094ff</color>
+    <color name="colorUpdate">#707070</color>
 </resources>

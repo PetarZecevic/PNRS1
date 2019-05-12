@@ -3,6 +3,8 @@ package com.example.weatherforecast;
 import android.graphics.Bitmap;
 
 public class WeatherData {
+    public String date;
+    public String day;
     public int temperature;
     public double humidity;
     public int pressure;
@@ -12,6 +14,8 @@ public class WeatherData {
     public String windDirection;
     public Bitmap weatherIcon;
     WeatherData(){
+        date = "";
+        day = "";
         temperature = 0;
         humidity = 0;
         pressure = 0;
