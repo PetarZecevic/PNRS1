@@ -38,12 +38,13 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private SimpleDateFormat mDateFormat;
     private TextView mLocation, mDate, mUpdateText;
     private ImageButton mUpdateButton;
-    private Button mTemperatureOption, mSunriseOption, mWindOption;
+    private Button mTemperatureOption, mSunriseOption, mWindOption, mStatisticsButton;
     private Display mWindDisplay, mSunriseDisplay;
     private Locale mLocal;
     private WeatherTask mRefresher;
     private WeatherData mWeatherData;
-    private WeatherDbHelper mWeatherDatabase;
+    public static WeatherDbHelper weatherDatabase;
+    public static String currentDay;
 
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
@@ -67,6 +68,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mUpdateText = findViewById(R.id.update_text);
         mUpdateButton = findViewById(R.id.update_button);
         mUpdateButton.setOnClickListener(this);
+        findViewById(R.id.stats_button).setOnClickListener(this);
 
         mLocal = new Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build();
         mDateFormat = new SimpleDateFormat("dd.MM.yyyy", mLocal);
@@ -74,7 +76,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mRefresher = new WeatherTask(BASE_URL + mCityName + "&" + METRIC + "&" + APPID,
                 IMG_URL,this, this);
         mWeatherData = new WeatherData();
-        mWeatherDatabase = new WeatherDbHelper(this);
+        weatherDatabase = new WeatherDbHelper(getApplicationContext());
 
         initDisplays();
         initOptions();
@@ -89,9 +91,10 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         // Get day and date.
         String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, mLocal);
         day = day.substring(0,1).toUpperCase(mLocal) + day.substring(1);
+        currentDay = day;
         String currentDate = mDateFormat.format(mCalendar.getTime());
 
-        WeatherData wdata = mWeatherDatabase.readWeatherData(day, mCityName);
+        WeatherData wdata = weatherDatabase.readApproximationData(mCityName);
         if(wdata == null){
             // Not found in database, get data from server.
             Thread t = new Thread(mRefresher);
@@ -214,7 +217,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mWeatherData.windDirection = degreeToCardinal(windObj.getDouble("deg"));
         // Weather Image.
         mWeatherData.weatherIcon = imageData;
-        mWeatherDatabase.insert(mWeatherData, mCityName);
+        weatherDatabase.insert(mWeatherData, mCityName);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -280,6 +283,11 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 Thread t = new Thread(mRefresher);
                 t.start();
                 break;
+            case R.id.stats_button:
+                // Switch to Statistics.
+                Intent intent = new Intent(this, StatisticsActivity.class);
+                intent.putExtra(MainActivity.CITY_INDEX, mCityName);
+                startActivity(intent);
             default:
                 break;
         }

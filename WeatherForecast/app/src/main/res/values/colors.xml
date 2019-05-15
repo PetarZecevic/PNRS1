@@ -7,4 +7,5 @@
     <color name="colorSelected">#ffff00</color>
     <color name="colorOptionText">#0094ff</color>
     <color name="colorUpdate">#707070</color>
+    <color name="colorStats">#F0F09F</color>
 </resources>

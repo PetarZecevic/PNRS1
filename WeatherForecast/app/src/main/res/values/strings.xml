@@ -20,4 +20,19 @@
     <string name="wind_direction_text">Pravac:</string>
     <string name="update_text">(Last updated)</string>
     <string name="update_description">When clicked application requests new weather data from server</string>
+    <string name="stats_text">STATISTIKA</string>
+    <string name="stats_last_week_text">Poslednja nedelja:</string>
+    <string name="stats_day_text">Dan</string>
+    <string name="stats_temp_text">Temperatura</string>
+    <string name="stats_pressure_text">Pritisak</string>
+    <string name="stats_humidity_text">Vlažnost vazduha</string>
+    <string name="stats_monday_text">Ponedeljak</string>
+    <string name="stats_tuesday_text">Utorak</string>
+    <string name="stats_wednesday_text">Sreda</string>
+    <string name="stats_thursday_text">Četvrtak</string>
+    <string name="stats_friday_text">Petak</string>
+    <string name="stats_saturday_text">Subota</string>
+    <string name="stats_sunday_text">Nedelja</string>
+    <string name="stats_min_temp_text">Min temperatura:</string>
+    <string name="stats_max_temp_text">Max temperatura:</string>
 </resources>

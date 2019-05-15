@@ -53,12 +53,19 @@
             android:src="@drawable/update"
             android:contentDescription="@string/update_description"/>
     </LinearLayout>
-
+    <Button
+        android:id="@+id/stats_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stats_text"
+        android:layout_gravity="center"
+        style="@style/StatsTheme"
+        android:layout_marginTop="10sp"
+        />
     <LinearLayout
         android:id="@+id/button_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30sp"
         android:orientation="horizontal">
         <Button
             android:id="@+id/temp_button"

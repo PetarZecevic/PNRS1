@@ -5,6 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class WeatherDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "weather";
@@ -21,8 +29,6 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_SUNSET = "Sunset";
     public static final String COLUMN_WIND_SPEED = "WindSpeed";
     public static final String COLUMN_WIND_DIRECTION = "WindDirection";
-
-    private SQLiteDatabase mDb = null;
 
     public WeatherDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -66,14 +72,69 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
         close();
     }
 
+    /**
+     * Calculates difference between two dates in days.
+     * @param date1 current date
+     * @param date2 previous date
+     * @return number of days between two dates
+     */
+    private long dateDaysDifference(Date date1, Date date2){
+        long diffDays = 0;
+        long diffMilies = Math.abs(date1.getTime() - date2.getTime());
+        diffDays = TimeUnit.DAYS.convert(diffMilies, TimeUnit.MILLISECONDS);
+        return diffDays;
+    }
+
+    // Find closest data to current date.
+    public WeatherData readApproximationData(String cityName)
+    {
+        WeatherData wdata;
+        SQLiteDatabase db = getReadableDatabase();
+        // If data is not found try to find closest date to current date for given city.
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        Date currentDate = new Date();
+        Cursor cursor = db.query(TABLE_NAME, null, COLUMN_CITY_NAME + "=?",
+                new String[]{cityName}, null, null, null);
+        cursor.moveToFirst();
+
+        if (cursor.isAfterLast())
+        {
+            // If city is not found return null.
+            return null;
+        }
+        else
+        {
+            long minDifference = Long.MAX_VALUE;
+            long tmpDifference = 0;
+            int position = 0;
+            while (!cursor.isAfterLast())
+            {
+                try {
+                    Date databaseDate = formatter.parse(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
+                    tmpDifference = dateDaysDifference(currentDate, databaseDate);
+                    if (tmpDifference < minDifference) {
+                        minDifference = tmpDifference;
+                        position = cursor.getPosition();
+                    }
+                } catch (ParseException e) {
+                    Log.d("WeatherDB", "Parse error: " + e.getMessage());
+                }
+                cursor.moveToNext();
+            }
+            cursor.moveToPosition(position);
+            wdata = createWeatherData(cursor);
+        }
+        return wdata;
+    }
+
     public WeatherData readWeatherData(String day, String cityName) {
         SQLiteDatabase db = getReadableDatabase();
+        WeatherData wdata = null;
         Cursor cursor;
         cursor = db.query(TABLE_NAME, null,
                     COLUMN_DAY + "=? AND " + COLUMN_CITY_NAME + "=?",
                     new String[] {day ,cityName}, null, null, null);
         cursor.moveToFirst();
-        WeatherData wdata;
         wdata = createWeatherData(cursor);
         close();
         return wdata;
