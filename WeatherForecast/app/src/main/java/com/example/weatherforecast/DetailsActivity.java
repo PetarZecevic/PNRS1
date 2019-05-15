@@ -43,7 +43,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private Locale mLocal;
     private WeatherTask mRefresher;
     private WeatherData mWeatherData;
-    public static WeatherDbHelper weatherDatabase;
+    private WeatherDbHelper weatherDatabase;
     public static String currentDay;
 
     private class TemperatureDisplay extends Display{

@@ -38,6 +38,7 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
     }
 
     private Day[] mWeekWeatherData;
+    private WeatherDbHelper weatherDatabase;
     private int currentDayIndex;
     private boolean coldSelected;
     private boolean hotSelected;
@@ -55,6 +56,7 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
         findViewById(R.id.stats_hot_days).setOnClickListener(this);
 
         mWeekWeatherData = new Day[7];
+        weatherDatabase = new WeatherDbHelper(getApplicationContext());
         currentDayIndex = -1;
         coldSelected = false;
         hotSelected = false;
@@ -104,7 +106,7 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
 
         String day = (String)d.dayView.getText();
         Log.d(LOG_TAG, "Day " + day);
-        WeatherData wdata = DetailsActivity.weatherDatabase.readWeatherData(day, mCityName);
+        WeatherData wdata = weatherDatabase.readWeatherData(day, mCityName);
         if(wdata != null)
             d.update(wdata.temperature, wdata.pressure, wdata.humidity);
         else
