@@ -9,4 +9,5 @@ import org.json.JSONObject;
 public interface onUpdateListener {
     void update(JSONObject jsonObject, Bitmap imageData) throws JSONException;
     void errorHandler(Context context);
+    void sendNotification(Context context);
 }

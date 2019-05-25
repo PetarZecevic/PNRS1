@@ -1,5 +1,7 @@
 package com.example.weatherforecast;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +10,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -266,6 +269,30 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 alert.show();
             }
         });
+    }
+
+    @Override
+    public void sendNotification(Context context) {
+        // Create notification.
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(context, "CHANNEL_1")
+                        .setSmallIcon(R.drawable.icon1)
+                        .setContentTitle("Temperatura je azurirana")
+                        .setContentText(String.valueOf(mWeatherData.temperature))
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true);
+        // Add notification.
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(manager != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel("CHANNEL_1",
+                        "CHANNEL_WEATHER",
+                        NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription("Send notification to user when weather data for city is updated");
+                manager.createNotificationChannel(channel);
+            }
+            manager.notify(0, builder.build());
+        }
     }
 
     @Override

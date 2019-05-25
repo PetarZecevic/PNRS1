@@ -32,6 +32,7 @@ public class CallbackWeather extends ICallbackExample.Stub{
                             .getJSONObject(0)
                             .getString("icon")+".png");
             mListener.update(weatherJSON, data);
+            mListener.sendNotification(mContext);
         }catch (Exception e){
             //mListener.errorHandler(mContext);
             Log.d("CallbackWeather", e.getMessage());
