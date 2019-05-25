@@ -1,6 +1,42 @@
 package com.example.weatherforecast;
 
-import IBinderExample.Stub;
+import android.os.RemoteException;
+import android.util.Log;
 
-public class BinderExample extends Stub {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class BinderExample extends IBinderExample.Stub {
+    private static final String TAG = "BinderExample";
+    private ICallbackExample mCallback;
+    private CallbackCaller mCaller = new CallbackCaller();
+    private Timer mTimer = null;
+
+    @Override
+    public void setCallback(ICallbackExample callback) throws RemoteException {
+        mCallback = callback;
+        mCaller = new CallbackCaller();
+        if(mTimer != null){
+            mTimer.cancel();
+        }
+        mTimer = new Timer();
+        mTimer.schedule(mCaller, 0, 10000L);
+    }
+
+    public void stop() {
+        mTimer.cancel();
+    }
+
+    private class CallbackCaller extends TimerTask {
+        @Override
+        public void run() {
+            try {
+                mCallback.onCallbackCall();
+            } catch (NullPointerException e) {
+                // callback is null, do nothing
+            } catch (RemoteException e) {
+                Log.e(TAG, "onCallbackCall failed", e);
+            }
+        }
+    }
 }

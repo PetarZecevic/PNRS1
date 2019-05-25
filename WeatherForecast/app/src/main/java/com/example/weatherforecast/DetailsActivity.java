@@ -1,9 +1,13 @@
 package com.example.weatherforecast;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,7 +31,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        AdapterView.OnItemSelectedListener, onUpdateListener{
+        AdapterView.OnItemSelectedListener, onUpdateListener, ServiceConnection {
     public final static String LOG_TAG = "DetailsActivity";
     private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather?q=";
     private final static String IMG_URL = "http://api.openweathermap.org/img/w/";
@@ -52,6 +56,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         public ImageView weatherIcon;
     }
     private TemperatureDisplay mTemperatureDisplay;
+    private IBinderExample mService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +86,20 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         initDisplays();
         initOptions();
         getData();
+
+        Intent intent = new Intent(this, BinderService.class);
+        if(!bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+            Log.d(LOG_TAG, "Bind Failed!");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mService != null) {
+            Log.d(LOG_TAG, "unbindService");
+            unbindService(this);
+        }
     }
 
     /**
@@ -192,7 +211,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void update(JSONObject jsonObject, Bitmap imageData) throws JSONException {
+    public synchronized void update(JSONObject jsonObject, Bitmap imageData) throws JSONException {
         Log.d(LOG_TAG, "JSON: " + jsonObject.toString());
         JSONObject sysObj = jsonObject.getJSONObject("sys"); // sunset.
         JSONObject mainObj = jsonObject.getJSONObject("main"); // temperature, humidity, pressure.
@@ -227,7 +246,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void errorHandler(final Context context) {
+    public synchronized void errorHandler(final Context context) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -315,6 +334,24 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        Log.d(LOG_TAG, "onServiceConnected");
+        mService = IBinderExample.Stub.asInterface(iBinder);
+        try {
+            mService.setCallback(new CallbackWeather(BASE_URL + mCityName + "&" + METRIC + "&" + APPID,
+                    IMG_URL,this, this));
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "setCallback failed", e);
+        }
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        Log.d(LOG_TAG, "onServiceDisconnected");
+        mService = null;
     }
 
     private int changeTempScale(int tempValue, boolean FC) {
