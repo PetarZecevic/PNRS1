@@ -11,6 +11,7 @@ public class BinderExample extends IBinderExample.Stub {
     private ICallbackExample mCallback;
     private CallbackCaller mCaller = new CallbackCaller();
     private Timer mTimer = null;
+    private final long mRefreshPeriod = 60000L; // in milliseconds.
 
     @Override
     public void setCallback(ICallbackExample callback) throws RemoteException {
@@ -20,7 +21,7 @@ public class BinderExample extends IBinderExample.Stub {
             mTimer.cancel();
         }
         mTimer = new Timer();
-        mTimer.schedule(mCaller, 0, 10000L);
+        mTimer.schedule(mCaller, 0, mRefreshPeriod);
     }
 
     public void stop() {
