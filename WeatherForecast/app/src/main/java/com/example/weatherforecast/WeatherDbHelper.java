@@ -78,20 +78,48 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
      * @param date2 previous date
      * @return number of days between two dates
      */
-    private long dateDaysDifference(Date date1, Date date2){
+    public static long dateDaysDifference(Date date1, Date date2){
         long diffDays = 0;
         long diffMilies = Math.abs(date1.getTime() - date2.getTime());
         diffDays = TimeUnit.DAYS.convert(diffMilies, TimeUnit.MILLISECONDS);
         return diffDays;
     }
 
-    // Find closest data to current date.
+    // Find closest data to current date on database subset.
+    private Cursor getClosestData(Cursor cursor, Date currentDate)
+    {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        long minDifference = Long.MAX_VALUE;
+        long tmpDifference = 0;
+        int position = 0;
+        while (!cursor.isAfterLast())
+        {
+            try {
+                Date databaseDate = formatter.parse(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
+                tmpDifference = dateDaysDifference(currentDate, databaseDate);
+                if (tmpDifference < minDifference) {
+                    minDifference = tmpDifference;
+                    position = cursor.getPosition();
+                }
+            } catch (ParseException e) {
+                Log.d("WeatherDB", "Parse error: " + e.getMessage());
+            }
+            cursor.moveToNext();
+        }
+        cursor.moveToPosition(position);
+        return cursor;
+    }
+
+    /**
+     *
+     * @param cityName
+     * Find closest data to current date for given city.
+     * @return class that encapsulates all weather data.
+     */
     public WeatherData readApproximationData(String cityName)
     {
         WeatherData wdata;
         SQLiteDatabase db = getReadableDatabase();
-        // If data is not found try to find closest date to current date for given city.
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
         Date currentDate = new Date();
         Cursor cursor = db.query(TABLE_NAME, null, COLUMN_CITY_NAME + "=?",
                 new String[]{cityName}, null, null, null);
@@ -104,37 +132,29 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
         }
         else
         {
-            long minDifference = Long.MAX_VALUE;
-            long tmpDifference = 0;
-            int position = 0;
-            while (!cursor.isAfterLast())
-            {
-                try {
-                    Date databaseDate = formatter.parse(cursor.getString(cursor.getColumnIndex(COLUMN_DATE)));
-                    tmpDifference = dateDaysDifference(currentDate, databaseDate);
-                    if (tmpDifference < minDifference) {
-                        minDifference = tmpDifference;
-                        position = cursor.getPosition();
-                    }
-                } catch (ParseException e) {
-                    Log.d("WeatherDB", "Parse error: " + e.getMessage());
-                }
-                cursor.moveToNext();
-            }
-            cursor.moveToPosition(position);
+            cursor = getClosestData(cursor, currentDate);
             wdata = createWeatherData(cursor);
         }
+        close();
         return wdata;
     }
 
+    /**
+     *
+     * @param day
+     * @param cityName
+     * Find closest data to current date for given city and day.
+     * @return class that encapsulates all weather data.
+     */
     public WeatherData readWeatherData(String day, String cityName) {
         SQLiteDatabase db = getReadableDatabase();
-        WeatherData wdata = null;
-        Cursor cursor;
-        cursor = db.query(TABLE_NAME, null,
+        WeatherData wdata;
+        Date currentDate = new Date();
+        Cursor cursor = db.query(TABLE_NAME, null,
                     COLUMN_DAY + "=? AND " + COLUMN_CITY_NAME + "=?",
                     new String[] {day ,cityName}, null, null, null);
         cursor.moveToFirst();
+        cursor = getClosestData(cursor, currentDate);
         wdata = createWeatherData(cursor);
         close();
         return wdata;

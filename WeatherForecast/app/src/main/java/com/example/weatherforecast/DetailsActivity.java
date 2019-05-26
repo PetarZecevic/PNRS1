@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -36,6 +37,8 @@ import java.util.Locale;
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener,
         AdapterView.OnItemSelectedListener, onUpdateListener, ServiceConnection {
     public final static String LOG_TAG = "DetailsActivity";
+    public final static String DAY_INDEX = "day_index";
+    public final static String DATE_INDEX = "date_index";
     private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather?q=";
     private final static String IMG_URL = "http://api.openweathermap.org/img/w/";
     private final static String METRIC = "units=metric";
@@ -51,7 +54,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private WeatherTask mRefresher;
     private WeatherData mWeatherData;
     private WeatherDbHelper weatherDatabase;
-    public static String currentDay;
+    private String mCurrentDay = null; // Latest day from database.
+    private String mCurrentDate = null; // Latest date from database.
 
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
@@ -89,11 +93,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         initDisplays();
         initOptions();
         getData();
-
-        Intent intent = new Intent(this, BinderService.class);
-        if(!bindService(intent, this, Context.BIND_AUTO_CREATE)) {
-            Log.d(LOG_TAG, "Bind Failed!");
-        }
+        startService();
     }
 
     @Override
@@ -106,16 +106,22 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     /**
+     * Start background bind service for refreshing weather data.
+     */
+    private void startService(){
+        Intent intent = new Intent(this, BinderService.class);
+        if(!bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+            Log.d(LOG_TAG, "Bind Failed!");
+        }
+    }
+
+    /**
      * Try to get weather data from database and if it does not exist in database,
      * get it from server.
      */
     private void getData() {
-        // Get day and date.
-        String day = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, mLocal);
-        day = day.substring(0,1).toUpperCase(mLocal) + day.substring(1);
-        currentDay = day;
+        // Get date.
         String currentDate = mDateFormat.format(mCalendar.getTime());
-
         WeatherData wdata = weatherDatabase.readApproximationData(mCityName);
         if(wdata == null){
             // Not found in database, get data from server.
@@ -200,6 +206,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         // Set current date.
         mDate.setText(mWeatherData.date);
         mUpdateText.setVisibility(View.INVISIBLE);
+        mCurrentDay = mWeatherData.day; // Update current day for statistics.
+        mCurrentDate = mWeatherData.date; // Update date for statistics.
     }
 
     private void initOptions(){
@@ -333,6 +341,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 // Switch to Statistics.
                 Intent intent = new Intent(this, StatisticsActivity.class);
                 intent.putExtra(MainActivity.CITY_INDEX, mCityName);
+                intent.putExtra(DetailsActivity.DAY_INDEX, mCurrentDay);
+                intent.putExtra(DetailsActivity.DATE_INDEX, mCurrentDate);
                 startActivity(intent);
             default:
                 break;

@@ -18,12 +18,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
         AdapterView.OnItemLongClickListener
 {
+    private static final String LOG_TAG = "MainActivity";
+    public static final String CITY_INDEX = "city_name_index";
     private EditText mCity;
     private Button mSubmit;
     private AlertDialog mAlert1, mAlert2;
     private CityAdapter mAdapter;
-    private static final String TAG = "MainActivity";
-    public static final String CITY_INDEX = "city_name_index";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){

@@ -13,6 +13,8 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
 
     private static final String LOG_TAG = "StatisticsActivity";
     private String mCityName;
+    private String mLatestDay;
+    private String mLatestDate;
 
     private class Day{
         public TextView dayView, temperatureView, pressureView, humidityView;
@@ -49,6 +51,9 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_statistics);
 
         mCityName = getIntent().getStringExtra(MainActivity.CITY_INDEX);
+        mLatestDay = getIntent().getStringExtra(DetailsActivity.DAY_INDEX);
+        mLatestDate = getIntent().getStringExtra(DetailsActivity.DATE_INDEX);
+
         TextView header = findViewById(R.id.stats_city_name);
         header.setText(mCityName);
 
@@ -151,17 +156,21 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
         if(currentDayIndex != -1)
             mWeekWeatherData[currentDayIndex].dayView.setTextColor(
                     getResources().getColor(R.color.colorAccent));
-        else{
-            String cd = DetailsActivity.currentDay;
-            for(int i = 0; i < 7; i++){
-                String tmpDay = (String) mWeekWeatherData[i].dayView.getText();
-                if(cd.equals(tmpDay)){
-                    currentDayIndex = i;
-                    break;
+        else
+        {
+            if(mLatestDay != null && !mLatestDate.isEmpty()) {
+                for (int i = 0; i < 7; i++) {
+                    String tmpDay = (String) mWeekWeatherData[i].dayView.getText();
+                    if (mLatestDay.equals(tmpDay)) {
+                        currentDayIndex = i;
+                        break;
+                    }
+                }
+                if(currentDayIndex != -1) {
+                    mWeekWeatherData[currentDayIndex].dayView.setTextColor(
+                            getResources().getColor(R.color.colorAccent));
                 }
             }
-            mWeekWeatherData[currentDayIndex].dayView.setTextColor(
-                    getResources().getColor(R.color.colorAccent));
         }
     }
 

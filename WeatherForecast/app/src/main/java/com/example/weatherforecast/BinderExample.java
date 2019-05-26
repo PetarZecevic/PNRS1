@@ -21,7 +21,7 @@ public class BinderExample extends IBinderExample.Stub {
             mTimer.cancel();
         }
         mTimer = new Timer();
-        mTimer.schedule(mCaller, 0, mRefreshPeriod);
+        mTimer.schedule(mCaller, mRefreshPeriod, mRefreshPeriod);
     }
 
     public void stop() {
