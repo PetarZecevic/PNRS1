@@ -34,8 +34,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+// Represents screen where user see's each parameter of weather data for given city.
 public class DetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        AdapterView.OnItemSelectedListener, onUpdateListener, ServiceConnection {
+        AdapterView.OnItemSelectedListener, onUpdateListener {
     public final static String LOG_TAG = "DetailsActivity";
     public final static String DAY_INDEX = "day_index";
     public final static String DATE_INDEX = "date_index";
@@ -56,14 +57,13 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private WeatherDbHelper weatherDatabase;
     private String mCurrentDay = null; // Latest day from database.
     private String mCurrentDate = null; // Latest date from database.
-
     private class TemperatureDisplay extends Display{
         public ArrayAdapter<String> unitsAdapter;
         public String scaleSelected;
         public ImageView weatherIcon;
+        public double tempRealValue;
     }
     private TemperatureDisplay mTemperatureDisplay;
-    private IBinderExample mService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,23 +96,18 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         startService();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mService != null) {
-            Log.d(LOG_TAG, "unbindService");
-            unbindService(this);
-        }
-    }
-
     /**
      * Start background bind service for refreshing weather data.
      */
     private void startService(){
-        Intent intent = new Intent(this, BinderService.class);
-        if(!bindService(intent, this, Context.BIND_AUTO_CREATE)) {
-            Log.d(LOG_TAG, "Bind Failed!");
-        }
+        WeatherService.infoURL = BASE_URL + mCityName + "&" + METRIC + "&" + APPID;
+        WeatherService.imageURL = IMG_URL;
+        WeatherService.context = this;
+        WeatherService.listener = this;
+        Intent intent = new Intent(this, WeatherService.class);
+        // stop previously started service.
+        stopService(intent);
+        startService(intent);
     }
 
     /**
@@ -145,6 +140,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     private void initDisplays(){
         // Temperature display.
         mTemperatureDisplay = new TemperatureDisplay();
+        mTemperatureDisplay.tempRealValue = 0;
         mTemperatureDisplay.itemsHolder = findViewById(R.id.temp_display);
         mTemperatureDisplay.unitsAdapter = new ArrayAdapter<>(this,
                 R.layout.support_simple_spinner_dropdown_item);
@@ -186,10 +182,16 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
 
     private void updateDisplays() {
         synchronized (mTemperatureDisplay) {
+            mTemperatureDisplay.tempRealValue = mWeatherData.temperature; // keep temperature saved always in celsius.
             mTemperatureDisplay.values.put("pressure", String.valueOf(mWeatherData.pressure));
-            if(mTemperatureDisplay.scaleSelected.equals("F"))
-                mWeatherData.temperature = changeTempScale(mWeatherData.temperature, true);
-            mTemperatureDisplay.values.put("temperature", String.valueOf(mWeatherData.temperature));
+            if(mTemperatureDisplay.scaleSelected.equals("F")) {
+                mTemperatureDisplay.values.put("temperature",
+                        String.valueOf((int) changeTempScale(mWeatherData.temperature, true)));
+            }
+            else {
+                mTemperatureDisplay.values.put("temperature",
+                        String.valueOf((int) mWeatherData.temperature));
+            }
             mTemperatureDisplay.values.put("humidity", String.valueOf(mWeatherData.humidity));
             mTemperatureDisplay.weatherIcon.setImageBitmap(mWeatherData.weatherIcon);
             mTemperatureDisplay.setValues();
@@ -285,8 +287,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, "CHANNEL_1")
                         .setSmallIcon(R.drawable.icon1)
-                        .setContentTitle("Temperatura je azurirana")
-                        .setContentText(String.valueOf(mWeatherData.temperature))
+                        .setContentTitle(mCityName + ": temperatura ažurirana")
+                        .setContentText(String.valueOf((int)mWeatherData.temperature))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true);
         // Add notification.
@@ -355,50 +357,28 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
             String item = mTemperatureDisplay.unitsAdapter.getItem(i);
             if (!mTemperatureDisplay.scaleSelected.equals(item)) {
                 mTemperatureDisplay.scaleSelected = item;
-                int val = Integer.valueOf(mTemperatureDisplay.values.get("temperature"));
+                double val = mTemperatureDisplay.tempRealValue; // value is always in celsius.
                 if (item.equals("F")) {
                     val = changeTempScale(val, true);
-                } else {
-                    val = changeTempScale(val, false);
                 }
                 // Update value in view object.
-                mTemperatureDisplay.values.put("temperature", String.valueOf(val));
+                mTemperatureDisplay.values.put("temperature", String.valueOf((int)val));
                 mTemperatureDisplay.setValues();
             }
         }
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
+    public void onNothingSelected(AdapterView<?> adapterView) {}
 
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        Log.d(LOG_TAG, "onServiceConnected");
-        mService = IBinderExample.Stub.asInterface(iBinder);
-        try {
-            mService.setCallback(new CallbackWeather(BASE_URL + mCityName + "&" + METRIC + "&" + APPID,
-                    IMG_URL,this, this));
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "setCallback failed", e);
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-        Log.d(LOG_TAG, "onServiceDisconnected");
-        mService = null;
-    }
-
-    private int changeTempScale(int tempValue, boolean FC) {
-        int result = 0;
+    private double changeTempScale(double tempValue, boolean FC) {
+        double result = 0;
         if(FC)
             // Fahrenheit.
-            result = (int)((double)tempValue * 1.8 + 32);
+            result = (tempValue * 1.8 + 32);
         else
             // Celsius.
-            result = (int)(((double)tempValue - 32) / 1.8);
+            result = ((tempValue - 32) / 1.8);
         return result;
     }
 

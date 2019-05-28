@@ -4,13 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import org.json.JSONObject;
 
-
+// Class for handling API calls, and getting data from OpenWeatherMap server.
 public class WeatherTask implements Runnable{
     private String mInfoURL;
     private String mImageURL;
     private Context mContext;
     private onUpdateListener mListener;
     private HttpHelper mHttpHelper;
+
     public WeatherTask(String infoURL, String imageURL, Context context, onUpdateListener listener){
         mInfoURL = infoURL;
         mImageURL = imageURL;
@@ -18,6 +19,7 @@ public class WeatherTask implements Runnable{
         mListener = listener;
         mHttpHelper = new HttpHelper();
     }
+
     @Override
     public void run() {
         try {

@@ -113,7 +113,7 @@ public class StatisticsActivity extends AppCompatActivity implements View.OnClic
         Log.d(LOG_TAG, "Day " + day);
         WeatherData wdata = weatherDatabase.readWeatherData(day, mCityName);
         if(wdata != null)
-            d.update(wdata.temperature, wdata.pressure, wdata.humidity);
+            d.update((int)wdata.temperature, wdata.pressure, wdata.humidity);
         else
             d.update(8, 1013, 40.1);
     }

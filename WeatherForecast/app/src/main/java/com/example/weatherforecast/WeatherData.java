@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 public class WeatherData {
     public String date;
     public String day;
-    public int temperature;
+    public double temperature;
     public double humidity;
     public int pressure;
     public String sunUp;
