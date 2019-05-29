@@ -64,6 +64,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         public double tempRealValue;
     }
     private TemperatureDisplay mTemperatureDisplay;
+    private ConversionNDK mConvertor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +91,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 IMG_URL,this, this);
         mWeatherData = new WeatherData();
         weatherDatabase = new WeatherDbHelper(getApplicationContext());
+
+        mConvertor = new ConversionNDK();
 
         initDisplays();
         initOptions();
@@ -186,7 +190,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
             mTemperatureDisplay.values.put("pressure", String.valueOf(mWeatherData.pressure));
             if(mTemperatureDisplay.scaleSelected.equals("F")) {
                 mTemperatureDisplay.values.put("temperature",
-                        String.valueOf((int) changeTempScale(mWeatherData.temperature, true)));
+                        String.valueOf((int) mConvertor.changeTempScale(mWeatherData.temperature, true)));
             }
             else {
                 mTemperatureDisplay.values.put("temperature",
@@ -246,7 +250,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         mWeatherData.sunUp = new SimpleDateFormat("HH:mm", mLocal).format(dsunrise);
         mWeatherData.sunDown = new SimpleDateFormat("HH:mm", mLocal).format(dsunset);
         mWeatherData.windSpeed = windObj.getDouble("speed");
-        mWeatherData.windDirection = degreeToCardinal(windObj.getDouble("deg"));
+        mWeatherData.windDirection = mConvertor.degreeToCardinal(windObj.getDouble("deg"));
         // Weather Image.
         mWeatherData.weatherIcon = imageData;
         weatherDatabase.insert(mWeatherData, mCityName);
@@ -359,7 +363,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
                 mTemperatureDisplay.scaleSelected = item;
                 double val = mTemperatureDisplay.tempRealValue; // value is always in celsius.
                 if (item.equals("F")) {
-                    val = changeTempScale(val, true);
+                    val = mConvertor.changeTempScale(val, true);
                 }
                 // Update value in view object.
                 mTemperatureDisplay.values.put("temperature", String.valueOf((int)val));
@@ -371,6 +375,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {}
 
+    /*
     private double changeTempScale(double tempValue, boolean FC) {
         double result = 0;
         if(FC)
@@ -381,7 +386,9 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
             result = ((tempValue - 32) / 1.8);
         return result;
     }
+    */
 
+    /*
     // Convert degree wind direction to cardinal direction:
     //      example: 80 -> E
     private String degreeToCardinal(double degree){
@@ -420,4 +427,5 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
             direction += "NNW";
         return direction;
     }
+    */
 }
